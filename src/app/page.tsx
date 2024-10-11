@@ -1,101 +1,128 @@
+"use client"
+
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [selectedTab, setSelectedTab] = useState(0)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const [interviewData, setInterviewData] = useState<any>(null)
+  const [userInfoData, setUserInfoData] = useState<any>(null)
+
+  useEffect(() => {
+    getAuthToken()
+
+    fetchData()
+  }, [])
+
+  const getAuthToken = () => {
+    if (localStorage.getItem('token'))
+      return localStorage?.getItem('token') ?? ''
+    else
+      window.location.href = '/registration'
+  }
+
+  const fetchData = () => {
+    const token = getAuthToken()
+
+    fetch('/api/interviews?' + new URLSearchParams({ token: token ?? '' }), {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
+    .then((res: any) => res.json())
+    .then((res: any) => {
+      setInterviewData(res.data)
+    })
+    .catch(e => {
+      console.error(e)
+    })
+
+    fetch('/api/userInfo?' + new URLSearchParams({ token: token ?? '' }), {
+      method: 'GET'
+    })
+    .then((res: any) => res.json())
+    .then((res: any) => {
+      setUserInfoData(res.data)
+    })
+    .catch(e => {
+      console.error(e)
+    })
+  }
+  
+  return (
+    <div className="w-full min-h-screen bg-white flex flex-col space-y-8">
+      <div className="pt-8 w-full bg-blue-500 rounded-b-3xl overflow-hidden shadow-xl">
+        <div className="w-full px-80 py-12 flex flex-row items-center space-x-8">
+          <img className="w-32 h-32 bg-gray-200 rounded-full"/>
+          <div className="flex flex-col space-y-3">
+            <div className="text-4xl font-bold text-white tracking-tight">{ userInfoData?.full_name ?? '' }</div>
+            <div className="flex flex-col space-y-1">
+              <div className="text-lg font-medium text-white">{ userInfoData?.email ?? '' }</div>
+              <div className="text-lg font-medium text-white">{ userInfoData?.phone_number ?? '' }</div>
+            </div>
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <div className="px-80 bg-gray-50 flex flex-row space-x-5">
+          <div onClick={() => setSelectedTab(0)} className={`transition-colors duration-300 select-none cursor-pointer px-3 py-3 border-b-4 text-lg font-semibold tracking-tight ${(selectedTab == 0) ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-500'}`}>Wawancara</div>
+          <div onClick={() => setSelectedTab(1)} className={`transition-colors duration-300 select-none cursor-pointer px-3 py-3 border-b-4 text-lg font-semibold tracking-tight ${(selectedTab == 1) ? 'border-blue-500 text-blue-500' : 'border-transparent text-gray-500'}`}>Pengumuman</div>
+        </div>
+      </div>
+      <div className="w-full px-80 py-8">
+        { (selectedTab == 0) ? interviewData?.map((item: any, index: number) => {
+          return (
+            <div key={index} className="px-8 py-6 rounded-3xl border border-gray-300 flex flex-col space-y-8">
+              <div className="text-3xl font-semibold">Informasi Wawancara</div>
+              <div className="flex flex-row">
+                <div className="w-1/2 flex flex-col space-y-10">
+                  <div className="flex flex-col space-y-1">
+                    <div className="text-xl font-semibold text-blue-500">Posisi yang Dilamar</div>
+                    <div className="text-lg font-semibold text-gray-700">{ item.position ?? '' }</div>
+                    <div>{ item.company_name ?? '' }</div>
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <div className="text-xl font-semibold text-blue-500">Interviewer</div>
+                    <div className="text-lg font-semibold text-gray-700">{ item.interviewer_name ?? '' }</div>
+                    <div>{ item.interviewer_position ?? '' }</div>
+                  </div>
+                </div>
+                <div className="w-1/2 flex flex-col space-y-10">
+                  <div className="flex flex-col space-y-1">
+                    <div className="text-xl font-semibold text-blue-500">Tanggal & Waktu</div>
+                    <div>{ item.date ? new Date(parseInt(item.date)).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '' }</div>
+                    <div>{ item.date ? new Date(parseInt(item.date)).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '' } WIB - Selesai</div>
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <div className="text-xl font-semibold text-blue-500">Lokasi</div>
+                    <div>{ item.location ?? '' }</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}) ?? ''
+          :
+          interviewData?.map((item: any, index: number) => {
+            return (
+              <div key={index} className="px-8 py-6 rounded-3xl border border-gray-300 flex flex-col space-y-8">
+                <div className="text-3xl font-semibold">Hasil Seleksi</div>
+                <div className="flex flex-col space-y-3">
+                  { (item.result == 1) ?
+                    <>
+                      <div className="text-lg font-bold text-green-500 tracking-tight">LOLOS KE TAHAP BERIKUTNYA</div>
+                      <div className="text-lg text-gray-700 font-medium">Selamat! Anda telah berhasil lolos ke tahap selanjutnya dalam proses seleksi. Tim rekruter akan segera menghubungi Anda untuk menjadwalkan seleksi selanjutnya.</div>
+                    </>
+                    :
+                    <>
+                      <div className="text-lg font-bold text-red-400 tracking-tight">BELUM DITERIMA</div>
+                      <div className="text-lg text-gray-700 font-medium">Terima kasih atas minat Anda untuk bergabung. Setelah melalui proses seleksi yang ketat, kami memutuskan untuk melanjutkan dengan kandidat lain yang lebih sesuai dengan kebutuhan saat ini. Kami berharap Anda sukses dalam pencarian pekerjaan Anda.</div>
+                    </>
+                  }
+                </div>
+              </div>
+          )}) ?? ''
+        }
+      </div>
     </div>
   );
 }
